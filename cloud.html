@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weather App</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #cce0ff, #ffffff);
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1, #datetime {
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      margin: 20px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .weather {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-top: 20px;
+    }
+    .icon {
+      font-size: 40px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Simple Weather</h1>
+  <div id="datetime">Loading date...</div>
+  <input type="text" id="cityInput" placeholder="Enter city and press Enter" />
+  <div class="weather" id="weatherDisplay">
+    <!-- Weather info will go here -->
+  </div>
+</div>
+
+<script>
+  function updateDateTime() {
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('datetime').textContent = `${now.toLocaleDateString(undefined, options)} – ${time}`;
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 60000);
+
+  const apiKey = "YOUR_API_KEY"; // Replace with your OpenWeatherMap API key
+
+  document.getElementById('cityInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      const city = e.target.value.trim();
+      if (city) {
+        fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=imperial&appid=${apiKey}`)
+          .then(res => res.json())
+          .then(data => {
+            const temp = Math.round(data.main.temp);
+            const weather = data.weather[0].main;
+            const icon = getWeatherEmoji(weather);
+            document.getElementById('weatherDisplay').innerHTML = `
+              <div><strong>${data.name}</strong></div>
+              <div>${temp}°F – ${weather}</div>
+              <div class="icon">${icon}</div>
+            `;
+          })
+          .catch(() => {
+            document.getElementById('weatherDisplay').innerHTML = "City not found.";
+          });
+      }
+    }
+  });
+
+  function getWeatherEmoji(condition) {
+    const emojis = {
+      Clear: "☀️",
+      Clouds: "⛅",
+      Rain: "🌧️",
+      Drizzle: "🌦️",
+      Thunderstorm: "⛈️",
+      Snow: "❄️",
+      Mist: "🌫️"
+    };
+    return emojis[condition] || "🌈";
+  }
+</script>
+
+</body>
+</html>
